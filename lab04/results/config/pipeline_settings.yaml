@@ -1,0 +1,22 @@
+pipeline_metadata:
+  author: "Selman Burak Uygurt\xFCrk"
+  student_id: 72922
+  architecture: Scikit-Learn ColumnTransformer Pipeline
+  seed: 72922
+data_hashes:
+  train_record_sha256: f57abe3dd4890304435ff1183dec2f5a58557463fea24b802dfa6e44e23a8d97
+  test_record_sha256: bee213c59bcf301d0bfd287eec99acc2c0b2205b16ef6f0dcc37ad1cd7588ad4
+benchmark:
+  baseline_without_features:
+    accuracy: 0.8538
+    f1: 0.6663
+    precision: 0.7338
+    recall: 0.6101
+  enhanced_with_features:
+    accuracy: 0.858
+    f1: 0.6778
+    precision: 0.7417
+    recall: 0.6241
+  improvement:
+    accuracy_delta: 0.0042
+    f1_delta: 0.0115
