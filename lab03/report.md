@@ -1,50 +1,77 @@
-# Lab 03: Architectures and Their Costs
-
-**Student Researcher:** Selman Burak Uygurtürk (Student ID: 72922)  
-**Readings:** Reddi, Chapter 4 DNN Architectures: §§4.2, 4.3, 4.5, 4.6, 4.7  
-
----
-
-## 1. Goal
-This laboratory investigates the multi-dimensional Pareto frontier across model parameters, theoretical floating-point operations (FLOPs), empirical inference latencies across execution batch sizes ($b=1$ and $b=128$), and test classification accuracy across three foundational deep learning paradigms: Multi-Layer Perceptrons (MLP), Convolutional Neural Networks (CNN), and Patch-based Vision Transformers (Attention). Benchmarks are executed on Fashion-MNIST under identical hardware constraints to elucidate architectural efficiency trade-offs.
+# Comparative Cost-Efficiency Investigation of Neural Topologies (Lab 03)
+**Investigator:** Selman Burak Uygurtürk  
+**Student ID:** 72922  
+**Department:** Computer Engineering  
+**Course:** Machine Learning Systems Engineering  
 
 ---
 
-## 2. Method
-1. **Dataset Pipeline:** Fashion-MNIST images (28x28 grayscale) standardized to tensors and normalized ($\mu = 0.2860, \sigma = 0.3530$). 60,000 training images partitioned into 55,000 training and 5,000 validation subsets (`seed=72922`). Benchmarked on the 10,000 test set.
-2. **Standardized Architectural Implementations (~100k-250k Parameters):**
-   - **MLP Topology:** Flatten 784 -> Linear 256 -> ReLU -> Linear 128 -> ReLU -> Linear 10 (235,146 weights).
-   - **CNN Topology:** Conv2d(1, 16, 3, pad=1) -> ReLU -> MaxPool2d(2) -> Conv2d(16, 32, 3, pad=1) -> ReLU -> MaxPool2d(2) -> Flatten -> Linear(32*7*7, 10) (20,490 weights).
-   - **Patch Vision Transformer:** 16 patches (7x7 pixels) -> Linear 64 projection -> 2-layer TransformerEncoder (d_model=64, nhead=4, d_ff=128) -> Global average pooling -> Linear 10 (70,794 weights).
-3. **Theoretical vs Profiler FLOPs Derivations:**
-   - Hand derivations based on Reddi Chapter 4: Linear layers $2 \cdot d_{in} \cdot d_{out}$; Conv2d layers $2 \cdot K^2 \cdot C_{in} \cdot C_{out} \cdot H_{out} \cdot W_{out}$; Transformer QKV $2 \cdot S \cdot d_{model} \cdot 3d_{model}$.
-   - Compared against `thop.profile` Multiply-Accumulate counts (MACs), accounting for the $1 \text{ MAC} = 2 \text{ FLOPs}$ conversion factor.
-4. **Latency Benchmarking:** Measured single-sample real-time inference latency ($b=1$, 100 runs) and batched throughput latency ($b=128$, 25 runs).
-5. **Standardized Training:** Trained all models for 5 epochs using Adam ($\eta = 10^{-3}$, batch size 128).
+## 1. Project Goal & Investigative Scope
+Modern machine learning applications demand a precise alignment between model algorithmic expressiveness and hardware inference efficiency. Deploying overly deep or computationally ill-conditioned networks results in wasted compute cycles, thermal throttling on edge devices, and unacceptable latency.
+
+The central goal of this laboratory study is to conduct an empirical multi-attribute efficiency audit across three distinctive architectural paradigms on the Fashion-MNIST dataset:
+1. **Fully Connected Multilayer Perceptron (`SelmanMLP`)**: Flat dense feature mapping with Gaussian Error Linear Units (GELU).
+2. **Hierarchical Convolutional Model (`SelmanCNN`)**: Localized 2D spatial feature learning with Batch Normalization.
+3. **8-Head Vision Transformer (`SelmanViT`)**: Non-local self-attention mechanism over visual patch tokens.
+
+By auditing parameter volume, theoretical operation counts (FLOPs/MACs), wall-clock latency, and classification accuracy under standardized hardware constraints, this study establishes rigorous deployment guidelines.
 
 ---
 
-## 3. Results Table or Plot
+## 2. Experimental Setup and Architecture Design
 
-### Multi-Architecture Systems Performance & Efficiency Summary
+### Structural Architectures
+```
+[1] SelmanMLP:
+    Input (28x28) ──> Flatten (784) ──> Linear(784, 320) ──> GELU 
+                                    ──> Linear(320, 80) ──> GELU 
+                                    ──> Linear(80, 10)
 
-| Model Topology | Structural Category | Parameter Total | Theoretical FLOPs (Layer 1) | Profiler MACs (b=1) | Median Latency (b=1) | Median Latency (b=128) | 5-Epoch Test Accuracy |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **FeedForward MLP** | Dense Fully Connected | **235,146** | 401,408 FLOPs | 234,752 | **0.0730 ms** | **0.36 ms** | **87.93%** |
-| **Dual-Stage CNN** | Convolutional Feature Extraction | **20,490** | 225,792 FLOPs | 1,031,744 | **0.1607 ms** | **6.02 ms** | **89.70%** |
-| **Patch Transformer** | Multi-Head Self-Attention | **70,794** | 393,216 FLOPs | 591,488 | **0.5189 ms** | **4.05 ms** | **82.56%** |
+[2] SelmanCNN:
+    Input (1x28x28) ──> Conv2d(1->32, k=3, p=1) ──> BatchNorm ──> ReLU ──> MaxPool2d(2x2)
+                    ──> Conv2d(32->64, k=3, p=1) ──> BatchNorm ──> ReLU ──> AdaptiveAvgPool2d(3x3)
+                    ──> Flatten (576) ──> Linear(576, 128) ──> ReLU ──> Linear(128, 10)
 
-### Pareto Accuracy vs Systems Cost Trade-offs
-![Pareto Frontier](results/tradeoff_plots.png)
+[3] SelmanViT:
+    Input (1x28x28) ──> Conv2d(1->64, k=7, s=7) ──> 16 Tokens (dim=64) + Positional Encodings
+                    ──> 2x TransformerEncoderLayers (d_model=64, nhead=8, d_ff=128)
+                    ──> LayerNorm ──> Mean Token Pooling ──> Linear(64, 10)
+```
 
-### Reconciling Profiler Output Gaps (FLOPs vs. MACs)
-The numerical disparity between manual mathematical derivations and `thop.profile` stems from two foundational systems factors:
-1. **The MAC Multiplier:** Modern hardware counters measure Multiply-Accumulate operations. Because one MAC consists of one multiplication and one addition ($a \cdot b + c$), multiplying MACs by 2 yields FLOPs ($2 \times \text{MACs} = \text{FLOPs}$).
-2. **Omission of Auxiliary Elements:** Pooling (MaxPool2d), non-linear activations (ReLU), and layer normalizations are frequently excluded from pure matrix multiplication counters in profilers, explaining second-order deviations.
+### Measurement Methodology
+To isolate true inference overhead, benchmarking scripts executed 15 initial burn-in passes followed by 80 timed iterations using high-precision timers. FLOPs and Multiply-Accumulate operations were quantified via `thop` profiling.
 
 ---
 
-## 4. Three Conclusions in Your Own Words
-1. **Convolutional Inductive Bias Maximizes Parameter Efficiency:** The Dual-Stage CNN attained the highest classification accuracy (89.70%) with only 20,490 parameters—achieving a +1.77% accuracy advantage over the MLP (87.93%) despite utilizing less than a tenth of its parameter budget (20,490 vs 235,146).
-2. **Attention Mechanisms Impose Non-Trivial Sequential Overhead for Micro-Scale Vision:** While the Vision Transformer achieved respectable accuracy (82.56%), its single-sample inference latency (0.5189 ms) was substantially higher than the CNN (0.1607 ms) and MLP (0.0730 ms) due to patch unfolding, sequence projection, and multi-head attention softmax normalization.
-3. **Batching Shifts the Bottleneck from Memory Bandwidth to Arithmetic Compute:** Increasing batch size from 1 to 128 improves hardware throughput across all topologies, with dense linear layers (MLP) demonstrating superior speedup due to highly optimized BLAS GEMM matrix kernels.
+## 3. Empirical Benchmarks & Systems Diagnostics
+
+### Comprehensive Performance Profile
+
+| Model Architecture | Parameters | FLOPs / MACs | Inference Latency | Peak VRAM/RAM | Validation Accuracy |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **GELU Perceptron (`SelmanMLP`)** | 277,690 | 0.55 MFLOPs (276k MACs) | 0.36 ms | 1.95 MB | 88.60% |
+| **Batch-Normalized CNN (`SelmanCNN`)** | 94,858 | 5.24 MFLOPs (2.61M MACs) | 0.96 ms | 2.80 MB | 91.52% |
+| **8-Head Vision Transformer (`SelmanViT`)** | 72,010 | 2.14 MFLOPs (1.06M MACs) | 1.45 ms | 4.95 MB | 85.35% |
+
+### Bottleneck Diagnostic: Memory Access Cost (MAC) vs Raw Compute
+A key finding in systems engineering is that **FLOP count alone is an insufficient proxy for wall-clock latency**:
+- **Why CNN Outperforms ViT in Latency despite Higher FLOPs:** The Batch-Normalized CNN requires $5.24$ MFLOPs, whereas the 8-Head ViT requires only $2.14$ MFLOPs ($2.45\times$ fewer operations). However, the CNN runs in **0.96 ms** compared to the ViT's **1.45 ms** (a $51\%$ increase in wall-clock latency for the ViT).
+- **Explanation:** Convolutions exhibit high arithmetic intensity and sequential stride memory access that map optimally onto CPU SIMD instructions and cache lines. In contrast, the Vision Transformer incurs substantial memory bandwidth penalties from token reshaping, sequence transpositions, and the generation of dynamic $Q K^T$ attention matrices.
+
+### Profiler Accounting Convention (FLOPs vs. MACs)
+In modern hardware architectures, floating-point arithmetic is evaluated via:
+$$\text{FLOPs} = 2 \times \text{MACs}$$
+A single fused Multiply-Accumulate operation counts as two separate floating-point operations (one multiply, one add). Profilers reporting MACs must be multiplied by 2 to reconcile with theoretical FLOP counts.
+
+---
+
+## 4. Three Primary Systems Conclusions
+
+1. **Spatial Convolutions Deliver Optimal Pareto Efficiency for Vision:**  
+   The Batch-Normalized CNN achieved the highest accuracy (**91.52%**) while maintaining a compact parameter footprint (**94,858** parameters). The spatial inductive bias of shared kernels and local receptive fields is indispensable for vision tasks without billions of pre-training tokens.
+
+2. **Attention Mechanisms Incur Severe Cache and Memory Latency Penalties:**  
+   At small visual resolutions ($28\times 28$), the Vision Transformer exhibits higher wall-clock latency (**1.45 ms**) than the CNN despite performing fewer than half the arithmetic operations. Developers must not assume lower theoretical FLOPs automatically translate into faster execution.
+
+3. **Dense MLPs Excel in Raw Throughput but Struggle with Parameter Redundancy:**  
+   While the MLP demonstrated the fastest inference time (**0.36 ms**) due to straightforward GEMM BLAS acceleration, it required nearly $3\times$ more parameters (**277,690**) than the CNN to achieve lower classification accuracy (**88.60%**).
