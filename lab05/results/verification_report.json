@@ -1,0 +1,108 @@
+{
+  "student": "Selman Burak Uygurt\u00fcrk (72922)",
+  "target_expression": "((a * b + c) ** 2).relu().sum()",
+  "forward_loss_custom": 19.42635,
+  "forward_loss_torch": 19.42635,
+  "max_torch_error": 0.0,
+  "max_fd_error": 8.508460602740797e-09,
+  "threshold": 1e-06,
+  "passed": true,
+  "audit": [
+    {
+      "param": "a_0",
+      "custom_grad": 6.867000000000002,
+      "torch_grad": 6.867000000000002,
+      "fd_grad": 6.866999999743939,
+      "diff_torch": 0.0,
+      "diff_fd": 2.560627265779658e-10
+    },
+    {
+      "param": "a_1",
+      "custom_grad": -10.779999999999998,
+      "torch_grad": -10.779999999999998,
+      "fd_grad": -10.78000000376278,
+      "diff_torch": 0.0,
+      "diff_fd": 3.762782085914296e-09
+    },
+    {
+      "param": "a_2",
+      "custom_grad": 1.4000000000000012,
+      "torch_grad": 1.4000000000000012,
+      "fd_grad": 1.3999999914915406,
+      "diff_torch": 0.0,
+      "diff_fd": 8.508460602740797e-09
+    },
+    {
+      "param": "a_3",
+      "custom_grad": 2.0625,
+      "torch_grad": 2.0625,
+      "fd_grad": 2.0625000018981154,
+      "diff_torch": 0.0,
+      "diff_fd": 1.8981154426001012e-09
+    },
+    {
+      "param": "b_0",
+      "custom_grad": -4.414500000000001,
+      "torch_grad": -4.414500000000001,
+      "fd_grad": -4.414500001104216,
+      "diff_torch": 0.0,
+      "diff_fd": 1.1042144976158852e-09
+    },
+    {
+      "param": "b_1",
+      "custom_grad": 17.325,
+      "torch_grad": 17.325,
+      "fd_grad": 17.324999994627888,
+      "diff_torch": 0.0,
+      "diff_fd": 5.3721116444194195e-09
+    },
+    {
+      "param": "b_2",
+      "custom_grad": 0.2400000000000002,
+      "torch_grad": 0.2400000000000002,
+      "fd_grad": 0.24000000209412065,
+      "diff_torch": 0.0,
+      "diff_fd": 2.0941204326163643e-09
+    },
+    {
+      "param": "b_3",
+      "custom_grad": -4.125,
+      "torch_grad": -4.125,
+      "fd_grad": -4.125000003796231,
+      "diff_torch": 0.0,
+      "diff_fd": 3.7962308852002025e-09
+    },
+    {
+      "param": "c_0",
+      "custom_grad": -3.270000000000001,
+      "torch_grad": -3.270000000000001,
+      "fd_grad": -3.2700000041074873,
+      "diff_torch": 0.0,
+      "diff_fd": 4.107486351045964e-09
+    },
+    {
+      "param": "c_1",
+      "custom_grad": -7.699999999999999,
+      "torch_grad": -7.699999999999999,
+      "fd_grad": -7.6999999976123945,
+      "diff_torch": 0.0,
+      "diff_fd": 2.3876047805515555e-09
+    },
+    {
+      "param": "c_2",
+      "custom_grad": 0.40000000000000036,
+      "torch_grad": 0.40000000000000036,
+      "fd_grad": 0.3999999975690116,
+      "diff_torch": 0.0,
+      "diff_fd": 2.4309887436402278e-09
+    },
+    {
+      "param": "c_3",
+      "custom_grad": 2.75,
+      "torch_grad": 2.75,
+      "fd_grad": 2.749999996609631,
+      "diff_torch": 0.0,
+      "diff_fd": 3.3903688745340332e-09
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "student": "Selman Burak Uygurt\u00fcrk (72922)",
+  "eager_us": 47.63069993350655,
+  "traced_us": 42.28769999463111,
+  "speedup": 1.1263487950291406,
+  "contiguous_info": {
+    "shape": [
+      2048,
+      2048
+    ],
+    "stride": [
+      2048,
+      1
+    ],
+    "is_contiguous": true
+  },
+  "non_contiguous_info": {
+    "shape": [
+      2048,
+      2048
+    ],
+    "stride": [
+      1,
+      2048
+    ],
+    "is_contiguous": false
+  },
+  "time_contiguous_ms": 0.168472999939695,
+  "time_non_contiguous_ms": 0.3326459997333586,
+  "slowdown_factor": 1.9744766214908587,
+  "reallocation_ms": 8.853082499699667,
+  "ir_graph_sample": "graph(%self.1 : __torch__.DifferentiableArch,\n      %x : Float(64, 2, strides=[2, 1], requires_grad=0, device=cpu)):\n  %sig : __torch__.torch.nn.modules.activation.Sigmoid = prim::GetAttr[name=\"sig\"](%self.1)\n  %fc2 : __torch__.torch.nn.modules.linear.___torch_mangle_0.Linear = prim::GetAttr[name=\"fc2\"](%self.1)\n  %relu : __torch__.torch.nn.modules.activation.ReLU = prim::GetAttr[name=\"relu\"](%self.1)\n  %fc1 : __torch__.torch.nn.modules.linear.Linear = prim::GetAttr[name=\"fc1\"](%self.1)\n  %bias.1 : Tensor = prim::GetAttr[name=\"bias\"](%fc1)\n  %weight.1 : Tensor = prim::GetAttr[name=\"weight\"](%f"
+}
