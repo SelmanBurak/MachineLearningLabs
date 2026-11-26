@@ -1,0 +1,5 @@
+Stage,Time (ms),Share (%)
+data_loading,3540.67,32.02
+forward_pass,4746.62,42.93
+backward_pass,2225.71,20.13
+optimizer_step,544.58,4.92

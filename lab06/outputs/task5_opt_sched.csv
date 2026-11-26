@@ -1,0 +1,5 @@
+Run,Optimizer,Scheduler,Init LR,Final Val Acc (%),Best Val Acc (%),Final Val Loss,Total Time (s)
+Adam_StepLR,ADAM,step,0.001,90.85,90.85,0.2541,141.0
+Adam_CosineLR,ADAM,cosine,0.001,91.0,91.0,0.2508,151.0
+Adam_PlateauLR,ADAM,plateau,0.001,90.56,90.56,0.2598,107.6
+SGD_CosineLR,SGD,cosine,0.01,90.42,90.42,0.275,101.3
